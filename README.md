@@ -16,14 +16,38 @@ This MCP server allows AI assistants to:
 
 ### Available Tools
 
-| Tool | Description | Safety |
-|------|-------------|--------|
-| **List Tables** | Shows all tables in your database | ✅ Safe |
-| **Describe Table** | Shows structure of a specific table | ✅ Safe |
-| **Execute Read Query** | Runs SELECT statements only | ✅ Safe |
-| **Get Table Data** | Shows sample data from tables | ✅ Safe |
-| **Get Relationships** | Maps foreign key connections | ✅ Safe |
-| **Execute Query** | Runs any SQL (including writes) | ⚠️ Use carefully |
+The server provides 8 powerful tools for database interaction:
+
+#### 🔍 **Schema Discovery Tools**
+
+| Tool | Parameters | Description | Safety |
+|------|------------|-------------|--------|
+| **`list_schemas`** | _none_ | Lists all schemas in the database | ✅ Safe |
+| **`list_tables`** | `schema` (optional) | Lists all tables, optionally filtered by schema | ✅ Safe |
+| **`describe_table`** | `table_name`, `schema` (optional) | Shows table structure: columns, types, constraints, foreign keys | ✅ Safe |
+| **`get_table_relationships`** | _none_ | Maps all foreign key relationships across the database | ✅ Safe |
+
+#### 📊 **Data Exploration Tools**
+
+| Tool | Parameters | Description | Safety |
+|------|------------|-------------|--------|
+| **`get_table_data`** | `table_name`, `schema` (optional), `limit` (default: 10) | Returns sample data from a table | ✅ Safe |
+| **`get_unique_values`** | `table_name`, `column_name`, `schema` (optional), `limit` (default: 25) | Shows unique values in a column with frequency counts | ✅ Safe |
+
+#### ⚡ **Query Execution Tools**
+
+| Tool | Parameters | Description | Safety |
+|------|------------|-------------|--------|
+| **`execute_read_query`** | `sql` | Executes read-only SQL (SELECT, SHOW, DESCRIBE, EXPLAIN, WITH) | ✅ Safe |
+| **`execute_query`** | `sql` | Executes any SQL including writes (INSERT, UPDATE, DELETE, DDL) | ⚠️ **Destructive** |
+
+#### 🛡️ **Built-in Safety Features**
+
+- **Automatic Input Validation**: All table/column names are validated against SQL injection
+- **Result Limits**: Default maximum of 25 rows returned (configurable)
+- **Query Timeout**: Automatic timeout after 30 seconds (configurable)
+- **Read-Only Mode**: When enabled, blocks all write operations
+- **Smart Query Detection**: Automatically categorizes queries as safe or destructive
 
 ## Quick Setup
 
@@ -236,17 +260,6 @@ Enable read-only mode to prevent any data modifications:
 - **"Explain the database structure"** → Comprehensive schema overview
 - **"How are customers connected to orders?"** → Relationship mapping
 - **"What indexes exist on the products table?"** → Index information
-
-## Available Tools
-
-| Tool | What It Does | Safe? |
-|------|-------------|-------|
-| **List Tables** | Shows all tables in your database | ✅ Yes |
-| **Describe Table** | Shows structure of a specific table | ✅ Yes |
-| **Execute Read Query** | Runs SELECT statements only | ✅ Yes |
-| **Get Table Data** | Shows sample data from tables | ✅ Yes |
-| **Get Relationships** | Maps foreign key connections | ✅ Yes |
-| **Execute Query** | Runs any SQL (including writes) | ⚠️ Use carefully |
 
 ## Configuration Options
 
