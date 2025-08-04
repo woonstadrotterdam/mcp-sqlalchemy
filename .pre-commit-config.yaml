@@ -1,0 +1,29 @@
+repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    # uv version - using latest stable
+    rev: 0.8.4
+    hooks:
+      - id: uv-lock
+        name: uv-lock
+        description: "Ensure uv.lock is up to date with pyproject.toml"
+        entry: uv lock
+        language: system
+        files: ^(pyproject\.toml|uv\.lock)$
+        pass_filenames: false
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: debug-statements
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
