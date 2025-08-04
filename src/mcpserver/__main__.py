@@ -3,11 +3,11 @@
 MCP SQLAlchemy Server Entry Point
 
 This allows the package to be run directly with:
-uvx mcp_sqlalchemy
+uvx mcp-server
 
 or
 
-python -m mcp_sqlalchemy
+python -m mcpserver
 """
 import argparse
 import asyncio
