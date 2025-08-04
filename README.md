@@ -38,7 +38,7 @@ Add to your AI assistant's MCP configuration (see [detailed setup instructions](
       "command": "uvx",
       "args": ["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-server"],
       "env": {
-        "DATABASE_URL": "sqlite:///absolute/path/to/database.db"
+        "DATABASE_URL": "sqlite:////absolute/path/to/database.db"
       }
     }
   }
@@ -91,7 +91,7 @@ Edit your `claude_desktop_config.json` file:
         "mcp-server"
       ],
       "env": {
-        "DATABASE_URL": "sqlite:///absolute/path/to/database.db",
+        "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
         "READ_ONLY_MODE": "true"
       }
     }
@@ -122,7 +122,7 @@ If you're developing locally, use this configuration instead:
       "args": ["run", "mcp-server"],
       "cwd": "/absolute/path/to/mcp-sqlalchemy",
       "env": {
-        "DATABASE_URL": "sqlite:///absolute/path/to/database.db",
+        "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
         "READ_ONLY_MODE": "true"
       }
     }
