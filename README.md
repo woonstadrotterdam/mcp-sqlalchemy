@@ -128,9 +128,8 @@ Edit your `claude_desktop_config.json` file:
 Use the same configuration format above. The key fields are:
 
 - **`command`**: `"uvx"` for installation from Git
-- **`args`**: `["--from", "git+<your-repo-url>", "mcp-server"]`
+- **`args`**: `["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-server"]`
 - **`env.DATABASE_URL`**: Your database connection string
-- **`env.READ_ONLY_MODE`**: `"true"` for safety (recommended)
 
 See [Database Connection Examples](#database-connection-examples) for specific database URL formats.
 
@@ -147,7 +146,6 @@ If you're developing locally, use this configuration instead:
       "cwd": "/absolute/path/to/mcp-sqlalchemy",
       "env": {
         "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
-        "READ_ONLY_MODE": "true"
       }
     }
   }
@@ -222,7 +220,7 @@ DATABASE_URL="mysql://user:password@mysql.example.com:3306/dbname"
 
 ### Read-Only Mode (Recommended)
 
-Enable read-only mode to prevent any data modifications:
+Read-only mode is enabled by default to prevent any data modifications:
 
 ```python
 # The server automatically detects and blocks:
@@ -287,11 +285,6 @@ DB_SCHEMA_NAME=public
 
 - Install uvx: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - Or via pip: `pip install uv` then use `uv tool run` instead of `uvx`
-
-#### "Repository not accessible" (uvx installation)
-
-- Make sure the repository URL is correct and public
-- For private repos, use SSH: `git+ssh://git@github.com/woonstadrotterdam/mcp-sqlalchemy.git`
 
 ### Connection Issues
 
