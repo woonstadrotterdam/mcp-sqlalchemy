@@ -2,6 +2,7 @@
 
 A Model Context Protocol (MCP) server that enables AI assistants to interact with your databases safely and efficiently. Connect to SQLite, PostgreSQL, or MySQL databases and let AI help you explore schemas, query data, and analyze your database structure.
 
+> [!NOTE]
 > This mcp-server is inspired by langchain's [SQLDatabase-toolkit](https://python.langchain.com/api_reference/community/agent_toolkits/langchain_community.agent_toolkits.sql.toolkit.SQLDatabaseToolkit.html) and makes use of Python's [SQLAlchemy](https://www.sqlalchemy.org/) library.
 
 ## What This Does
@@ -48,6 +49,9 @@ The server provides 8 powerful tools for database interaction:
 - **Query Timeout**: Automatic timeout after 30 seconds (configurable)
 - **Read-Only Mode**: When enabled, blocks all write operations
 - **Smart Query Detection**: Automatically categorizes queries as safe or destructive
+
+> [!TIP]
+> Reasoning models, like o4-mini,  are *much* better at using this MCP server than regular models.
 
 ## Quick Setup
 
