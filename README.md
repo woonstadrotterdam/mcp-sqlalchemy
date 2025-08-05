@@ -89,7 +89,7 @@ uv sync
 
 ```bash
 # Start the development server to test using the proper entry point
-uv run mcp dev mcp-server
+uv run mcp dev src/mcp_sqlalchemy/_dev.py
 ```
 
 This will open a web interface where you can test the connection and explore your database.
@@ -318,14 +318,3 @@ DB_SCHEMA_NAME=public
 - You're in read-only mode (this is good for safety!)
 - Use the "Execute Read Query" tool instead
 - Or disable read-only mode if you need write access
-
-## Need Help?
-
-1. **Test your connection** first:
-   - For uvx installs: Run `uvx --from git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git mcp-server --http` and visit <http://localhost:8000>
-   - For local installs: Run `uv run mcp dev mcp-server`
-2. **Check the web interface** that opens to verify everything works
-3. **Start with simple queries** like "list tables" before complex operations
-4. **Use read-only mode** until you're comfortable with the setup
-
-This server is designed to be safe by default - it will protect your data while giving your AI assistant powerful database exploration capabilities.
