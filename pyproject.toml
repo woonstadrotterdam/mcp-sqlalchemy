@@ -33,7 +33,7 @@ mysql = ["aiomysql>=0.1.1"]
 all = ["asyncpg>=0.28.0", "aiomysql>=0.1.1"]
 
 [project.scripts]
-mcp-server= "mcpserver.__main__:main"
+mcp-sqlalchemy= "mcp_sqlalchemy.__main__:main"
 
 [build-system]
 requires = ["setuptools"]

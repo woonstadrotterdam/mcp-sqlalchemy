@@ -60,7 +60,7 @@ Add to your AI assistant's MCP configuration (see [detailed setup instructions](
   "mcpServers": {
     "sqlalchemy": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-server"],
+      "args": ["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-sqlalchemy"],
       "env": {
         "DATABASE_URL": "sqlite:////absolute/path/to/database.db"
       }
@@ -89,7 +89,7 @@ uv sync
 
 ```bash
 # Start the development server to test using the proper entry point
-uv run mcp dev mcp-server
+uv run mcp dev src/mcp_sqlalchemy/_dev.py
 ```
 
 This will open a web interface where you can test the connection and explore your database.
@@ -112,7 +112,7 @@ Edit your `claude_desktop_config.json` file:
       "args": [
         "--from",
         "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git",
-        "mcp-server"
+        "mcp-sqlalchemy"
       ],
       "env": {
         "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
@@ -128,7 +128,7 @@ Edit your `claude_desktop_config.json` file:
 Use the same configuration format above. The key fields are:
 
 - **`command`**: `"uvx"` for installation from Git
-- **`args`**: `["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-server"]`
+- **`args`**: `["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-sqlalchemy"]`
 - **`env.DATABASE_URL`**: Your database connection string
 
 See [Database Connection Examples](#database-connection-examples) for specific database URL formats.
@@ -142,7 +142,7 @@ If you're developing locally, use this configuration instead:
   "mcpServers": {
     "sqlalchemy": {
       "command": "uv",
-      "args": ["run", "mcp-server"],
+      "args": ["run", "mcp-sqlalchemy"],
       "cwd": "/absolute/path/to/mcp-sqlalchemy",
       "env": {
         "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
@@ -166,7 +166,7 @@ If you're developing locally, use this configuration instead:
 ```bash
 # Updates happen automatically when you restart your AI assistant
 # Or force update with:
-uvx --force --from git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git mcp-server
+uvx --force --from git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git mcp-sqlalchemy
 ```
 
 **For local installations:**
@@ -318,14 +318,3 @@ DB_SCHEMA_NAME=public
 - You're in read-only mode (this is good for safety!)
 - Use the "Execute Read Query" tool instead
 - Or disable read-only mode if you need write access
-
-## Need Help?
-
-1. **Test your connection** first:
-   - For uvx installs: Run `uvx --from git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git mcp-server --http` and visit <http://localhost:8000>
-   - For local installs: Run `uv run mcp dev mcp-server`
-2. **Check the web interface** that opens to verify everything works
-3. **Start with simple queries** like "list tables" before complex operations
-4. **Use read-only mode** until you're comfortable with the setup
-
-This server is designed to be safe by default - it will protect your data while giving your AI assistant powerful database exploration capabilities.
