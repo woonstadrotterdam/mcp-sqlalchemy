@@ -55,23 +55,40 @@ The server provides 8 powerful tools for database interaction:
 
 ## Quick Setup
 
+### Quick Reference
+
+| Database | Install Command | Dependencies |
+|----------|----------------|--------------|
+| **SQLite** | `uvx --from git+... mcp-sqlalchemy` | None (works out of the box) |
+| **PostgreSQL** | `uvx --from "git+... mcp-sqlalchemy[postgresql]"` | `asyncpg` |
+| **MySQL** | `uvx --from "git+... mcp-sqlalchemy[mysql]"` | `aiomysql` |
+| **All** | `uvx --from "git+... mcp-sqlalchemy[all]"` | `asyncpg` + `aiomysql` |
+
+## Installation & Configuration
+
 ### Option 1: Install via uvx (Recommended)
 
-Add to your AI assistant's MCP configuration (see [detailed setup instructions](#add-to-your-ai-assistant)):
+Add to your AI assistant's MCP configuration:
 
 ```json
 {
   "mcpServers": {
     "sqlalchemy": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-sqlalchemy"],
+      "args": [
+        "--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git#egg=mcp-sqlalchemy[postgresql]", // Choose: [postgresql], [mysql], [all], or omit for SQLite only
+      ],
       "env": {
-        "DATABASE_URL": "sqlite:////absolute/path/to/database.db"
+        "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
+        "READ_ONLY_MODE": "true"
       }
     }
   }
 }
 ```
+
+> [!TIP]
+> **MCP Configuration**: The JSON example above shows the complete configuration needed for your AI assistant. For local development, use `"command": "uv"` and `"args": ["run", "mcp-sqlalchemy"]` instead.
 
 ### Option 2: Local Development Setup
 
@@ -85,8 +102,11 @@ cd mcp-sqlalchemy
 uv venv
 source .venv/bin/activate # or .venv/Scripts/activate on Windows
 
-# Install dependencies
-uv sync
+# Install dependencies (choose one):
+uv sync                    # SQLite only
+uv sync --extra postgresql # + PostgreSQL support
+uv sync --extra mysql      # + MySQL support
+uv sync --extra all        # All database support
 ```
 
 #### Test the Connection
@@ -98,70 +118,12 @@ uv run mcp dev src/mcp_sqlalchemy/_dev.py
 
 This will open a web interface where you can test the connection and explore your database.
 
-## Add to Your AI Assistant
-
-### For uvx Installation (Recommended)
-
-Add this to your AI assistant's MCP configuration file:
-
-#### Claude Desktop (MacOS/Windows)
-
-Edit your `claude_desktop_config.json` file:
-
-```json
-{
-  "mcpServers": {
-    "sqlalchemy": {
-      "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git",
-        "mcp-sqlalchemy"
-      ],
-      "env": {
-        "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
-        "READ_ONLY_MODE": "true"
-      }
-    }
-  }
-}
-```
-
-#### Other MCP-Compatible AI Assistants
-
-Use the same configuration format above. The key fields are:
-
-- **`command`**: `"uvx"` for installation from Git
-- **`args`**: `["--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git", "mcp-sqlalchemy"]`
-- **`env.DATABASE_URL`**: Your database connection string
-
-See [Database Connection Examples](#database-connection-examples) for specific database URL formats.
-
-### For Local Development Setup
-
-If you're developing locally, use this configuration instead:
-
-```json
-{
-  "mcpServers": {
-    "sqlalchemy": {
-      "command": "uv",
-      "args": ["run", "mcp-sqlalchemy"],
-      "cwd": "/absolute/path/to/mcp-sqlalchemy",
-      "env": {
-        "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
-      }
-    }
-  }
-}
-```
-
 ### Installation Method Comparison
 
 | Method | Pros | Cons | Best For |
 |--------|------|------|----------|
-| **uvx** | Simple install, automatic updates, works anywhere | Requires internet | Most users |
-| **Local** | Works offline, can modify code, full control | Manual updates, manage dependencies | Developers |
+| **uvx** | Simple install, automatic updates, works anywhere | Requires internet, need `[extra]` syntax for PostgreSQL/MySQL | Most users |
+| **Local** | Works offline, can modify code, full control, easy dependency management | Manual updates, manage dependencies | Developers |
 
 ### Updating Your Installation
 
@@ -289,6 +251,12 @@ DB_SCHEMA_NAME=public
 
 - Install uvx: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - Or via pip: `pip install uv` then use `uv tool run` instead of `uvx`
+
+#### "Module not found" for PostgreSQL/MySQL
+
+- **PostgreSQL**: Install with `[postgresql]` syntax or ensure `asyncpg` is available
+- **MySQL**: Install with `[mysql]` syntax or ensure `aiomysql` is available
+- **All databases**: Use `[all]` syntax for complete support
 
 ### Connection Issues
 
