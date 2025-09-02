@@ -116,20 +116,12 @@ class SQLAlchemyMCP(FastMCP):
             }
         elif "mysql" in self.database_url:
             connect_args = {
-                "connect_timeout": self.max_query_timeout,
                 "read_timeout": self.max_query_timeout,
                 "write_timeout": self.max_query_timeout,
             }
 
         self.engine = create_async_engine(
             self.database_url,
-            # Connection pool settings
-            pool_size=10,  # Number of connections to maintain in the pool
-            max_overflow=20,  # Additional connections beyond pool_size
-            pool_timeout=self.max_query_timeout,  # Use configured timeout for getting connections
-            pool_recycle=3600,  # Recycle connections after 1 hour (helps with PostgreSQL connection limits)
-            pool_pre_ping=True,  # Verify connections before use
-            echo=False,
             connect_args=connect_args,
         )
 
