@@ -1,6 +1,6 @@
 [project]
 name = "mcp-sqlalchemy"
-version = "0.1.0"
+version = "0.2.1"
 description = "MCP server for SQLAlchemy database interactions - supports SQLite, PostgreSQL, and MySQL"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -30,7 +30,7 @@ dependencies = [
 [project.optional-dependencies]
 postgresql = ["asyncpg>=0.28.0"]
 mysql = ["aiomysql>=0.1.1"]
-all = ["asyncpg>=0.28.0", "aiomysql>=0.1.1"]
+all = ["mcp-sqlalchemy[postgresql]", "mcp-sqlalchemy[mysql]"]
 
 [project.scripts]
 mcp-sqlalchemy= "mcp_sqlalchemy.__main__:main"
