@@ -380,10 +380,8 @@ class SQLAlchemyMCP(FastMCP):
 
             try:
                 async with self.engine.connect() as connection:
-                    # Execute query with timeout protection
-                    result = await asyncio.wait_for(
-                        connection.execute(text(sql)), timeout=self.max_query_timeout
-                    )
+                    # Execute query (timeout handled by database driver)
+                    result = await connection.execute(text(sql))
 
                     # Only handle SELECT-type queries that return rows
                     if result.returns_rows:
@@ -420,8 +418,6 @@ class SQLAlchemyMCP(FastMCP):
                         )
                     else:
                         return "Query executed successfully."
-            except asyncio.TimeoutError:
-                return f"Query timeout: Query exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -463,10 +459,7 @@ class SQLAlchemyMCP(FastMCP):
                 async with self.engine.connect() as connection:
                     # Execute query with transaction management
                     async with connection.begin():
-                        result = await asyncio.wait_for(
-                            connection.execute(text(sql)),
-                            timeout=self.max_query_timeout,
-                        )
+                        result = await connection.execute(text(sql))
 
                         # Check if result has returning data (like SELECT)
                         if result.returns_rows:
@@ -520,8 +513,6 @@ class SQLAlchemyMCP(FastMCP):
                             else:
                                 # Generic success message for other operations (like DDL)
                                 return "Query executed successfully."
-            except asyncio.TimeoutError:
-                return f"Query timeout: Query exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -935,9 +926,7 @@ class SQLAlchemyMCP(FastMCP):
                         select(literal_column("*")).select_from(table_obj).limit(limit)
                     )
 
-                    result = await asyncio.wait_for(
-                        conn.execute(stmt), timeout=self.max_query_timeout
-                    )
+                    result = await conn.execute(stmt)
                     rows = result.fetchall()
 
                     table_ref = f"{schema}.{table_name}" if schema else table_name
@@ -960,8 +949,6 @@ class SQLAlchemyMCP(FastMCP):
                         f"Sample data from {table_ref} (limit {limit}):\n\n"
                         + "\n".join(str(item) for item in table_output)
                     )
-            except asyncio.TimeoutError:
-                return f"Query timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -1038,9 +1025,7 @@ class SQLAlchemyMCP(FastMCP):
                     )
 
                     # Get the values and their frequencies
-                    result = await asyncio.wait_for(
-                        conn.execute(stmt), timeout=self.max_query_timeout
-                    )
+                    result = await conn.execute(stmt)
                     freq_data = [(str(row[0]), row[1]) for row in result.fetchall()]
 
                     if not freq_data:
@@ -1054,8 +1039,6 @@ class SQLAlchemyMCP(FastMCP):
                     return f"{header}:\n\n" + "\n".join(
                         f"{val} (count: {count})" for val, count in freq_data
                     )
-            except asyncio.TimeoutError:
-                return f"Query timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
