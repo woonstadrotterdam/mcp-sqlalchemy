@@ -4,7 +4,6 @@ SQLAlchemy MCP Server
 
 from __future__ import annotations
 
-import asyncio
 import logging
 import os
 import re
@@ -540,9 +539,7 @@ class SQLAlchemyMCP(FastMCP):
                         inspector = inspect(sync_conn)
                         return inspector.get_schema_names()
 
-                    schemas = await asyncio.wait_for(
-                        conn.run_sync(get_schemas), timeout=self.max_query_timeout
-                    )
+                    schemas = await conn.run_sync(get_schemas)
 
                     if not schemas:
                         return "No schemas found in database."
@@ -552,8 +549,6 @@ class SQLAlchemyMCP(FastMCP):
                         result.append(f"- {schema}")
 
                     return "\n".join(str(item) for item in result)
-            except asyncio.TimeoutError:
-                return f"Operation timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -695,16 +690,12 @@ class SQLAlchemyMCP(FastMCP):
 
                         return {"result": result}
 
-                    relationship_data = await asyncio.wait_for(
-                        conn.run_sync(get_relationships), timeout=self.max_query_timeout
-                    )
+                    relationship_data = await conn.run_sync(get_relationships)
 
                     if "error" in relationship_data:
                         return relationship_data["error"]
 
                     return "\n".join(relationship_data["result"])
-            except asyncio.TimeoutError:
-                return f"Operation timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -770,12 +761,8 @@ class SQLAlchemyMCP(FastMCP):
                             else "No tables found.",
                         }
 
-                    table_data = await asyncio.wait_for(
-                        conn.run_sync(get_tables), timeout=self.max_query_timeout
-                    )
+                    table_data = await conn.run_sync(get_tables)
                     return table_data["message"]
-            except asyncio.TimeoutError:
-                return f"Operation timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -839,10 +826,7 @@ class SQLAlchemyMCP(FastMCP):
                             "fk_constraints": fk_constraints,
                         }
 
-                    table_data = await asyncio.wait_for(
-                        conn.run_sync(get_table_structure),
-                        timeout=self.max_query_timeout,
-                    )
+                    table_data = await conn.run_sync(get_table_structure)
 
                     if "error" in table_data:
                         return table_data["error"]
@@ -879,8 +863,6 @@ class SQLAlchemyMCP(FastMCP):
                                 f"- {constrained_columns} -> {referred_table_full}({referred_columns})"
                             )
                     return "\n".join(str(item) for item in result)
-            except asyncio.TimeoutError:
-                return f"Operation timeout: Operation exceeded the maximum allowed time of {self.max_query_timeout} seconds."
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -1002,9 +984,7 @@ class SQLAlchemyMCP(FastMCP):
                         column_names = [col["name"] for col in columns]
                         return column_names
 
-                    column_names = await asyncio.wait_for(
-                        conn.run_sync(check_column), timeout=self.max_query_timeout
-                    )
+                    column_names = await conn.run_sync(check_column)
                     table_ref = f"{schema}.{table_name}" if schema else table_name
 
                     if column_name not in column_names:
