@@ -618,7 +618,7 @@ class SQLAlchemyMCP(FastMCP):
                             }
 
                         # Focus on relationships between tables
-                        result = ["Table Relationships (Foreign Key Structure):"]
+                        result = []
 
                         for schema in schemas:
                             # First, collect foreign key information for all tables in this schema
@@ -719,7 +719,16 @@ class SQLAlchemyMCP(FastMCP):
                                     result.append(
                                         "    Referenced By: None (no dependencies)"
                                     )
+                        if not result:
+                            return {
+                                "result": [
+                                    "No pre-defined foreign key relationships found."
+                                ]
+                            }
 
+                        result = [
+                            "Table Relationships (Foreign Key Structure):"
+                        ] + result
                         return {"result": result}
 
                     relationship_data = await conn.run_sync(get_relationships)
