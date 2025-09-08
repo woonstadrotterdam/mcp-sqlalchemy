@@ -4,6 +4,7 @@ SQLAlchemy MCP Server
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 import re
@@ -88,36 +89,42 @@ class SQLAlchemyMCP(FastMCP):
                 "mysql://", "mysql+aiomysql://"
             )
 
-        # Prepare connection arguments
+        # Prepare connection arguments - only PostgreSQL needs custom settings
         connect_args = {}
-
-        # Get the schema name for setting search path
-        schema_name = os.getenv("DB_SCHEMA_NAME")
 
         # PostgreSQL-specific configuration
         if "postgresql" in self.database_url:
+            # Get the schema name for setting search path
+            schema_name = os.getenv("DB_SCHEMA_NAME")
+
             server_settings = {
                 "application_name": "mcp_sqlalchemy",
                 "jit": "off",  # Disable JIT compilation for better performance in short-lived connections
+                "statement_timeout": str(
+                    self.max_query_timeout * 1000
+                ),  # PostgreSQL statement timeout in milliseconds
             }
 
             # Set search path if schema is specified
             if schema_name:
                 server_settings["search_path"] = schema_name
 
-            connect_args = {"server_settings": server_settings}
+            connect_args = {
+                "server_settings": server_settings,
+                "command_timeout": self.max_query_timeout,  # asyncpg query timeout
+            }
+        # SQLite and MySQL use driver defaults (no custom connect_args needed)
 
         self.engine = create_async_engine(
             self.database_url,
-            # Connection pool settings for PostgreSQL
-            pool_size=10,  # Number of connections to maintain in the pool
-            max_overflow=20,  # Additional connections beyond pool_size
-            pool_timeout=30,  # Seconds to wait for a connection
-            pool_recycle=3600,  # Recycle connections after 1 hour (helps with PostgreSQL connection limits)
-            pool_pre_ping=True,  # Verify connections before use
-            echo=False,
             connect_args=connect_args,
         )
+
+        # Store database type for timeout handling
+        self.is_mysql = self.database_url.startswith(
+            ("mysql+aiomysql://", "mysql+asyncmy://")
+        )
+        self.is_sqlite = self.database_url.startswith("sqlite+aiosqlite://")
 
         # Register resources and tools
         self._register_resources()
@@ -165,6 +172,26 @@ class SQLAlchemyMCP(FastMCP):
                 return False
 
         return any(sql_lower.startswith(pattern) for pattern in read_only_patterns)
+
+    async def _setup_mysql_session(self, connection):
+        """Set up MySQL session with execution timeout."""
+        if self.is_mysql:
+            # Set max_execution_time in milliseconds
+            timeout_ms = self.max_query_timeout * 1000
+            await connection.execute(
+                text(f"SET SESSION max_execution_time = {timeout_ms}")
+            )
+
+    async def _execute_with_timeout(self, connection, query):
+        """Execute query with appropriate timeout handling based on database type."""
+        if self.is_sqlite:
+            # For SQLite, use asyncio.wait_for since it has no server-side timeout
+            return await asyncio.wait_for(
+                connection.execute(query), timeout=self.max_query_timeout
+            )
+        else:
+            # For PostgreSQL and MySQL, rely on server-side timeouts
+            return await connection.execute(query)
 
     async def _safe_execute(self, operation, *args, **kwargs):
         """Wrapper for safe database operations with error handling."""
@@ -374,8 +401,11 @@ class SQLAlchemyMCP(FastMCP):
 
             try:
                 async with self.engine.connect() as connection:
-                    # Execute query with timeout protection
-                    result = await connection.execute(text(sql))
+                    # Set up MySQL session timeout if needed
+                    await self._setup_mysql_session(connection)
+
+                    # Execute query with appropriate timeout handling
+                    result = await self._execute_with_timeout(connection, text(sql))
 
                     # Only handle SELECT-type queries that return rows
                     if result.returns_rows:
@@ -412,6 +442,8 @@ class SQLAlchemyMCP(FastMCP):
                         )
                     else:
                         return "Query executed successfully."
+            except asyncio.TimeoutError:
+                return f"Query timeout: Query execution exceeded {self.max_query_timeout} seconds"
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -451,9 +483,12 @@ class SQLAlchemyMCP(FastMCP):
 
             try:
                 async with self.engine.connect() as connection:
+                    # Set up MySQL session timeout if needed
+                    await self._setup_mysql_session(connection)
+
                     # Execute query with transaction management
                     async with connection.begin():
-                        result = await connection.execute(text(sql))
+                        result = await self._execute_with_timeout(connection, text(sql))
 
                         # Check if result has returning data (like SELECT)
                         if result.returns_rows:
@@ -507,6 +542,8 @@ class SQLAlchemyMCP(FastMCP):
                             else:
                                 # Generic success message for other operations (like DDL)
                                 return "Query executed successfully."
+            except asyncio.TimeoutError:
+                return f"Query timeout: Query execution exceeded {self.max_query_timeout} seconds"
             except SQLAlchemyError as e:
                 return f"Database error: {str(e)}"
             except Exception as e:
@@ -581,7 +618,7 @@ class SQLAlchemyMCP(FastMCP):
                             }
 
                         # Focus on relationships between tables
-                        result = ["Table Relationships (Foreign Key Structure):"]
+                        result = []
 
                         for schema in schemas:
                             # First, collect foreign key information for all tables in this schema
@@ -682,7 +719,16 @@ class SQLAlchemyMCP(FastMCP):
                                     result.append(
                                         "    Referenced By: None (no dependencies)"
                                     )
+                        if not result:
+                            return {
+                                "result": [
+                                    "No pre-defined foreign key relationships found."
+                                ]
+                            }
 
+                        result = [
+                            "Table Relationships (Foreign Key Structure):"
+                        ] + result
                         return {"result": result}
 
                     relationship_data = await conn.run_sync(get_relationships)
