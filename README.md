@@ -59,10 +59,10 @@ The server provides 8 powerful tools for database interaction:
 
 | Database | Install Command | Dependencies |
 |----------|----------------|--------------|
-| **SQLite** | `uvx --from git+... mcp-sqlalchemy` | None (works out of the box) |
-| **PostgreSQL** | `uvx --from "git+... mcp-sqlalchemy[postgresql]"` | `asyncpg` |
-| **MySQL** | `uvx --from "git+... mcp-sqlalchemy[mysql]"` | `aiomysql` |
-| **All** | `uvx --from "git+... mcp-sqlalchemy[all]"` | `asyncpg` + `aiomysql` |
+| **SQLite** | `uvx mcp-sqlalchemy` | None (works out of the box) |
+| **PostgreSQL** | `uvx "mcp-sqlalchemy[postgresql]"` | `asyncpg` |
+| **MySQL** | `uvx "mcp-sqlalchemy[mysql]"` | `aiomysql` |
+| **All** | `uvx "mcp-sqlalchemy[all]"` | `asyncpg` + `aiomysql` |
 
 ## Installation & Configuration
 
@@ -76,7 +76,7 @@ Add to your AI assistant's MCP configuration:
     "sqlalchemy": {
       "command": "uvx",
       "args": [
-        "--from", "git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git#egg=mcp-sqlalchemy[postgresql]", // Choose: [postgresql], [mysql], [all], or omit for SQLite only
+        "mcp-sqlalchemy[postgresql]", // Choose: [postgresql], [mysql], [all], or omit for SQLite only
       ],
       "env": {
         "DATABASE_URL": "sqlite:////absolute/path/to/database.db",
@@ -132,7 +132,7 @@ This will open a web interface where you can test the connection and explore you
 ```bash
 # Updates happen automatically when you restart your AI assistant
 # Or force update with:
-uvx --force --from git+https://github.com/woonstadrotterdam/mcp-sqlalchemy.git mcp-sqlalchemy
+uvx mcp-sqlalchemy
 ```
 
 **For local installations:**
