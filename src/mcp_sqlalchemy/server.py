@@ -750,19 +750,19 @@ class SQLAlchemyMCP(FastMCP):
                 title="List Tables",
             )
         )
-        async def list_tables(schema: Optional[str] = None) -> str:
+        async def list_tables(schema_name: Optional[str] = None) -> str:
             """
             List all tables in the database or in a specific schema.
 
             Args:
-                schema: Optional schema name to filter tables
+                schema_name: Optional schema name to filter tables
 
             Returns:
                 String listing of tables
             """
             # Validate inputs
-            if schema and not self._validate_identifier(schema):
-                return f"Error: Invalid schema name '{schema}'"
+            if schema_name and not self._validate_identifier(schema_name):
+                return f"Error: Invalid schema name '{schema_name}'"
 
             try:
                 async with self.engine.connect() as conn:
@@ -771,27 +771,25 @@ class SQLAlchemyMCP(FastMCP):
                         inspector = inspect(sync_conn)
                         result = []
 
-                        if schema:
+                        if schema_name:
                             # List tables in specific schema
-                            tables = inspector.get_table_names(schema=schema)
+                            tables = inspector.get_table_names(schema=schema_name)
                             if not tables:
                                 return {
                                     "result": [],
-                                    "message": f"No tables found in schema '{schema}'.",
+                                    "message": f"No tables found in schema '{schema_name}'.",
                                 }
 
-                            result.append(f"Tables in schema '{schema}':")
+                            result.append(f"Tables in schema '{schema_name}':")
                             for table in tables:
                                 result.append(f"- {table}")
                         else:
                             # List tables in all schemas
                             schemas = inspector.get_schema_names()
-                            for schema_name in schemas:
-                                tables = inspector.get_table_names(schema=schema_name)
+                            for schema in schemas:
+                                tables = inspector.get_table_names(schema=schema)
                                 if tables:
-                                    result.append(
-                                        f"\nTables in schema '{schema_name}':"
-                                    )
+                                    result.append(f"\nTables in schema '{schema}':")
                                     for table in tables:
                                         result.append(f"- {table}")
 
@@ -817,13 +815,15 @@ class SQLAlchemyMCP(FastMCP):
                 title="Describe table",
             )
         )
-        async def describe_table(table_name: str, schema: Optional[str] = None) -> str:
+        async def describe_table(
+            table_name: str, schema_name: Optional[str] = None
+        ) -> str:
             """
             Describe a table's structure.
 
             Args:
                 table_name: Name of the table to describe
-                schema: Optional schema name
+                schema_name: Optional schema name
 
             Returns:
                 String description of the table structure
@@ -832,8 +832,8 @@ class SQLAlchemyMCP(FastMCP):
             if not self._validate_identifier(table_name):
                 return f"Error: Invalid table name '{table_name}'"
 
-            if schema and not self._validate_identifier(schema):
-                return f"Error: Invalid schema name '{schema}'"
+            if schema_name and not self._validate_identifier(schema_name):
+                return f"Error: Invalid schema name '{schema_name}'"
 
             try:
                 async with self.engine.connect() as conn:
@@ -842,13 +842,13 @@ class SQLAlchemyMCP(FastMCP):
                         inspector = inspect(sync_conn)
 
                         # Get table columns
-                        columns = inspector.get_columns(table_name, schema=schema)
+                        columns = inspector.get_columns(table_name, schema=schema_name)
                         if not columns:
                             return {"error": f"Table '{table_name}' not found."}
 
                         # Get primary keys
                         pk_constraint = inspector.get_pk_constraint(
-                            table_name, schema=schema
+                            table_name, schema=schema_name
                         )
                         pk_columns = (
                             pk_constraint.get("constrained_columns", [])
@@ -858,7 +858,7 @@ class SQLAlchemyMCP(FastMCP):
 
                         # Get foreign keys
                         fk_constraints = inspector.get_foreign_keys(
-                            table_name, schema=schema
+                            table_name, schema=schema_name
                         )
 
                         return {
@@ -874,7 +874,7 @@ class SQLAlchemyMCP(FastMCP):
 
                     # Format response
                     result = [
-                        f"Table: {schema + '.' if schema else ''}{table_name}",
+                        f"Table: {schema_name + '.' if schema_name else ''}{table_name}",
                         "\nColumns:",
                     ]
                     for col in table_data["columns"]:
@@ -918,14 +918,14 @@ class SQLAlchemyMCP(FastMCP):
             )
         )
         async def get_table_data(
-            table_name: str, schema: Optional[str] = None, limit: int = 10
+            table_name: str, schema_name: Optional[str] = None, limit: int = 10
         ) -> str:
             """
             Get sample data from a table.
 
             Args:
                 table_name: Name of the table
-                schema: Optional schema name
+                schema_name: Optional schema name
                 limit: Maximum number of rows to return (default: 10)
 
             Returns:
@@ -935,8 +935,8 @@ class SQLAlchemyMCP(FastMCP):
             if not self._validate_identifier(table_name):
                 return f"Error: Invalid table name '{table_name}'"
 
-            if schema and not self._validate_identifier(schema):
-                return f"Error: Invalid schema name '{schema}'"
+            if schema_name and not self._validate_identifier(schema_name):
+                return f"Error: Invalid schema name '{schema_name}'"
 
             # Validate and cap limit
             limit = self._validate_limit(limit)
@@ -944,7 +944,7 @@ class SQLAlchemyMCP(FastMCP):
             try:
                 async with self.engine.connect() as conn:
                     # Build safe query using SQLAlchemy constructs
-                    table_obj = table(table_name, schema=schema)
+                    table_obj = table(table_name, schema=schema_name)
                     stmt = (
                         select(literal_column("*")).select_from(table_obj).limit(limit)
                     )
@@ -952,7 +952,9 @@ class SQLAlchemyMCP(FastMCP):
                     result = await conn.execute(stmt)
                     rows = result.fetchall()
 
-                    table_ref = f"{schema}.{table_name}" if schema else table_name
+                    table_ref = (
+                        f"{schema_name}.{table_name}" if schema_name else table_name
+                    )
                     if not rows:
                         return f"No data found in table {table_ref}."
 
@@ -988,7 +990,7 @@ class SQLAlchemyMCP(FastMCP):
         async def get_unique_values(
             table_name: str,
             column_name: str,
-            schema: Optional[str] = None,
+            schema_name: Optional[str] = None,
             limit: int = DEFAULT_MAX_RESULT_ROWS,
         ) -> str:
             """
@@ -997,7 +999,7 @@ class SQLAlchemyMCP(FastMCP):
             Args:
                 table_name: Name of the table
                 column_name: Name of the column to get unique values from
-                schema: Optional schema name
+                schema_name: Optional schema name
                 limit: Maximum number of unique values to return (default: 25)
 
             Returns:
@@ -1010,8 +1012,8 @@ class SQLAlchemyMCP(FastMCP):
             if not self._validate_identifier(column_name):
                 return f"Error: Invalid column name '{column_name}'"
 
-            if schema and not self._validate_identifier(schema):
-                return f"Error: Invalid schema name '{schema}'"
+            if schema_name and not self._validate_identifier(schema_name):
+                return f"Error: Invalid schema name '{schema_name}'"
 
             # Validate and cap limit
             limit = self._validate_limit(limit)
@@ -1021,18 +1023,20 @@ class SQLAlchemyMCP(FastMCP):
 
                     def check_column(sync_conn):
                         inspector = inspect(sync_conn)
-                        columns = inspector.get_columns(table_name, schema=schema)
+                        columns = inspector.get_columns(table_name, schema=schema_name)
                         column_names = [col["name"] for col in columns]
                         return column_names
 
                     column_names = await conn.run_sync(check_column)
-                    table_ref = f"{schema}.{table_name}" if schema else table_name
+                    table_ref = (
+                        f"{schema_name}.{table_name}" if schema_name else table_name
+                    )
 
                     if column_name not in column_names:
                         return f"Column '{column_name}' not found in table {table_ref}. Available columns: {', '.join(column_names)}"
 
                     # Build safe query using SQLAlchemy constructs
-                    table_obj = table(table_name, schema=schema)
+                    table_obj = table(table_name, schema=schema_name)
                     col_obj = column(column_name)
                     frequency_col = func.count(col_obj).label("frequency")
 
