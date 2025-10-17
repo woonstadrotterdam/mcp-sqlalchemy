@@ -393,20 +393,20 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiomysql", marker = "extra == 'mysql'", specifier = ">=0.1.1" },
-    { name = "aiosqlite", specifier = ">=0.21.0" },
-    { name = "asyncpg", marker = "extra == 'postgresql'", specifier = ">=0.28.0" },
-    { name = "greenlet", specifier = ">=3.0.0" },
-    { name = "mcp", extras = ["cli"], specifier = ">=1.12.2" },
+    { name = "aiomysql", marker = "extra == 'mysql'", specifier = "==0.2.0" },
+    { name = "aiosqlite", specifier = "==0.21.0" },
+    { name = "asyncpg", marker = "extra == 'postgresql'", specifier = "==0.30.0" },
+    { name = "greenlet", specifier = "==3.2.3" },
+    { name = "mcp", extras = ["cli"], specifier = "==1.13.1" },
     { name = "mcp-sqlalchemy", extras = ["mysql"], marker = "extra == 'all'" },
     { name = "mcp-sqlalchemy", extras = ["postgresql"], marker = "extra == 'all'" },
-    { name = "python-dotenv", specifier = ">=1.0.0" },
-    { name = "sqlalchemy", specifier = ">=2.0.42" },
+    { name = "python-dotenv", specifier = "==1.1.1" },
+    { name = "sqlalchemy", specifier = "==2.0.42" },
 ]
 provides-extras = ["postgresql", "mysql", "all"]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pre-commit", specifier = ">=4.2.0" }]
+dev = [{ name = "pre-commit", specifier = "==4.2.0" }]
 
 [[package]]
 name = "mdurl"
