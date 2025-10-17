@@ -24,16 +24,16 @@ The server provides 8 powerful tools for database interaction:
 | Tool | Parameters | Description | Safety |
 |------|------------|-------------|--------|
 | **`list_schemas`** | _none_ | Lists all schemas in the database | ✅ Safe |
-| **`list_tables`** | `schema` (optional) | Lists all tables, optionally filtered by schema | ✅ Safe |
-| **`describe_table`** | `table_name`, `schema` (optional) | Shows table structure: columns, types, constraints, foreign keys | ✅ Safe |
+| **`list_tables`** | `schema_name` (optional) | Lists all tables, optionally filtered by schema | ✅ Safe |
+| **`describe_table`** | `table_name`, `schema_name` (optional) | Shows table structure: columns, types, constraints, foreign keys | ✅ Safe |
 | **`get_table_relationships`** | _none_ | Maps all foreign key relationships across the database | ✅ Safe |
 
 #### 📊 **Data Exploration Tools**
 
 | Tool | Parameters | Description | Safety |
 |------|------------|-------------|--------|
-| **`get_table_data`** | `table_name`, `schema` (optional), `limit` (default: 10) | Returns sample data from a table | ✅ Safe |
-| **`get_unique_values`** | `table_name`, `column_name`, `schema` (optional), `limit` (default: 25) | Shows unique values in a column with frequency counts | ✅ Safe |
+| **`get_table_data`** | `table_name`, `schema_name` (optional), `limit` (default: 10) | Returns sample data from a table | ✅ Safe |
+| **`get_unique_values`** | `table_name`, `column_name`, `schema_name` (optional), `limit` (default: 25) | Shows unique values in a column with frequency counts | ✅ Safe |
 
 #### ⚡ **Query Execution Tools**
 
