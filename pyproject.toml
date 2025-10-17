@@ -1,6 +1,6 @@
 [project]
 name = "mcp-sqlalchemy"
-version = "0.2.3"
+version = "0.2.4"
 description = "MCP server for SQLAlchemy database interactions - supports SQLite, PostgreSQL, and MySQL"
 readme = "README.md"
 requires-python = ">=3.10"
