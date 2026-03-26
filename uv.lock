@@ -2,6 +2,10 @@ version = 1
 revision = 3
 requires-python = ">=3.10"
 
+[options]
+exclude-newer = "2026-03-19T07:13:51.723673Z"
+exclude-newer-span = "P1W"
+
 [[package]]
 name = "aiomysql"
 version = "0.3.0"

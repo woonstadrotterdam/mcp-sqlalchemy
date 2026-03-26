@@ -47,3 +47,6 @@ where = ["src"]
 dev = [
     "pre-commit==4.2.0",
 ]
+
+[tool.uv]
+exclude-newer = "1 week"
