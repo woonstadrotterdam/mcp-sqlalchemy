@@ -28,7 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 postgresql = ["asyncpg==0.30.0"]
-mysql = ["aiomysql==0.2.0"]
+mysql = ["aiomysql==0.3.0"]
 all = ["mcp-sqlalchemy[postgresql]", "mcp-sqlalchemy[mysql]"]
 
 [project.scripts]
